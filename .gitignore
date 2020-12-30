@@ -1,0 +1,5 @@
+# Any swp files from VIM
+*.swp
+
+pyenv/
+positions.json
