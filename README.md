@@ -2,10 +2,12 @@
 
 ## What is it?
 It is a python terminal application that displays a portfolio view of your
-coinbase crypto positions. Screenshot coming soon.
+coinbase crypto positions. See screenshot below.
+
+![Example screenshot](res/img/portfolio.png)
 
 It uses only public, unauthenticated coinbase API endpoints for price data. Data
-on your holdings comes from `positions.conf`.
+on your holdings comes from `positions.json`.
 
 ## How do I use it?
 Follow `positions.example.json` as a guide and create your own `positions.json`
