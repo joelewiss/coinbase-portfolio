@@ -92,14 +92,22 @@ def print_portfolio(pos, clear=False):
         row.append(symb)
 
         # Last price
-        row.append("{:,.2f}".format(prices[symb]))
+        if (prices[symb] < 10):
+            row.append("{:,.4f}".format(prices[symb]))
+        else:
+            row.append("{:,.2f}".format(prices[symb]))
 
         # Change $
         chgd = prices[symb] - p["price"]
         if (chgd < 0):
-            chgd = "{}{:,.2f}".format(cr.Fore.RED, chgd)
+            color = cr.Fore.RED
         else:
-            chgd = "{}{:,.2f}".format(cr.Fore.GREEN, chgd)
+            color = cr.Fore.GREEN
+
+        if (abs(chgd) < 10):
+            chgd = "{}{:,.4f}".format(color, chgd)
+        else:
+            chgd = "{}{:,.2f}".format(color, chgd)
 
         chgd += cr.Fore.RESET
         row.append(chgd)
@@ -124,7 +132,11 @@ def print_portfolio(pos, clear=False):
         else:
             color = cr.Fore.GREEN
 
-        row.append("{}{:,.2f}{}".format(color, tgd, cr.Fore.RESET))
+        if (abs(tgd) < 10):
+            row.append("{}{:,.4f}{}".format(color, tgd, cr.Fore.RESET))
+        else:
+            row.append("{}{:,.2f}{}".format(color, tgd, cr.Fore.RESET))
+
         tgain += tgd
 
         # Total Gain %
