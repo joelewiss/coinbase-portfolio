@@ -12,7 +12,6 @@ from requests import get
 from terminaltables import SingleTable
 
 
-
 """
 positions dictionary
 {
@@ -22,6 +21,8 @@ positions dictionary
     fee:    1.99,
 }
 """
+
+
 def read_positions():
     try:
         f = open("positions.json", "r")
@@ -29,11 +30,9 @@ def read_positions():
         print("Could not open positions.json file, exiting now")
         sys.exit(1)
 
-    
     pos = json.load(f)
     f.close()
     return pos
-
 
 
 """
@@ -44,9 +43,11 @@ pos     (dict)      Positions dictionary
 returns (dict       Dictionary with prices in the following format
                     { "symbol": priceNow, ... }
 """
+
+
 def get_prices(pos):
     prices = dict()
-    
+
     for p in pos:
         symb = p["symbol"]
         if symb not in prices:
@@ -64,22 +65,24 @@ def get_prices(pos):
 
     return prices
 
+
 """
 Prints out entire portfolio to stdout in a fancy table with colors
 pos     (dict)      Positions dictionary
 clear   (bool)      Determines if terminal is cleared and table is printed at
                     1,1
-
-
-Symbol,Last Price $,Change $,Change %,Qty,Price Paid,Day's Gain,Total Gain $,Total Gain %
 """
+
+
 def print_portfolio(pos, clear=False):
-    table = [["Symbol", "Last Price ($)", "Change ($)", "Change (%)", "Qty", 
-        "Price Paid ($)", "Total Gain ($)", "Total Gain (%)"]]
+    table = [["Symbol", "Last Price ($)", "Change ($)", "Change (%)", "Qty",
+              "Price Paid ($)", "Market Value ($)", "Total Gain ($)",
+              "Total Gain (%)"]]
     prices = get_prices(pos)
 
     # Keep track of useful totals
     tpricep = 0
+    tvalue = 0
     tgain = 0
 
     for p in pos:
@@ -124,6 +127,11 @@ def print_portfolio(pos, clear=False):
         row.append("{:,.2f}".format(ppaid))
         tpricep += ppaid
 
+        # Market value
+        mvalue = prices[symb] * p["qty"]
+        row.append("{:,.2f}".format(mvalue))
+        tvalue += mvalue
+
         # Total Gain $
         tgd = (prices[symb] - p["price"]) * p["qty"]
         tgd -= p["fee"]
@@ -143,27 +151,26 @@ def print_portfolio(pos, clear=False):
         tgp = tgd / (p["price"] * p["qty"])
         row.append("{:+.2%}".format(tgp))
 
+        table.append(row)
 
-        table.append(row) 
-
-    
     # Add in useful totals
-    totals = [""] * 8
+    totals = [""] * 9
     totals[0] = "TOTAL"
     # Total price paid is col 5
     totals[5] = "{:,.2f}".format(tpricep)
-    # Total gain is col 6
-    totals[6] = "{:,.2f}".format(tgain)
+    # Total Market value is col 6
+    totals[6] = "{:,.2f}".format(tvalue)
+    # Total gain is col 7
+    totals[7] = "{:,.2f}".format(tgain)
     # Calculate gain percentage
     gain = tgain / tpricep
-    totals[7] = "{:+.2%}".format(gain)
+    totals[8] = "{:+.2%}".format(gain)
     table.append(totals)
-
 
     if clear:
         # Clear screen using colorama helper functions
         print(cr.ansi.clear_screen())
-        # Position at top of screen 
+        # Position at top of screen
         print(cr.Cursor.POS(1, 1))
 
     # Print table
@@ -171,22 +178,10 @@ def print_portfolio(pos, clear=False):
     stbl.inner_footing_row_border = True
     print(stbl.table)
 
-    # Print portfolio value
-    tvalue = 0
-    for p in pos:
-        symb = p["symbol"]
-        tvalue += prices[symb] * p["qty"]
-
-    print(f"{cr.Style.BRIGHT}TOTAL PORTFOLIO VALUE: {tvalue:,.2f}" + 
-          f"{cr.Style.RESET_ALL}")
-
-
     print(time.strftime("%I:%M %p"))
-
 
 
 if __name__ == "__main__":
     pos = read_positions()
     cr.init()
     print_portfolio(pos)
-
